@@ -5,6 +5,8 @@ import {
   CodePipelineSource,
   ShellStep,
 } from "aws-cdk-lib/pipelines";
+import { PipelineAppStage } from "./demoAwsPipeline-app-stack";
+import { ManualApprovalStep } from "aws-cdk-lib/pipelines";
 
 export class DemoCicdPipelineCdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -21,5 +23,15 @@ export class DemoCicdPipelineCdkStack extends cdk.Stack {
         commands: ["npm ci", "npm run build", "npx cdk synth"],
       }),
     });
+
+    const testingStage = demoCICDPipline.addStage(
+      new PipelineAppStage(this, "test")
+    );
+
+    testingStage.addPost(new ManualApprovalStep("approval"));
+
+    const prodStage = demoCICDPipline.addStage(
+      new PipelineAppStage(this, "prod")
+    );
   }
 }
